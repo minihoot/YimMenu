@@ -368,25 +368,34 @@ namespace big
 						port).data());
 				ImGui::PopID();
 
+				// Kick off the background fetch so data is ready when the modal opens
 				std::string ipString = std::format("{}.{}.{}.{}", ip.value().m_field1, ip.value().m_field2, ip.value().m_field3, ip.value().m_field4);
 				fetchIpData(ipString);
 
-				std::lock_guard<std::mutex> lock(ipDataMutex);
-				if (ipDataCache.contains(ipString) && ipDataCache[ipString].isLoaded)
-				{
-					ImGui::Text(std::format("Continent: {} ({})", ipDataCache[ipString].continent, ipDataCache[ipString].continentCode).c_str());
-					ImGui::Text(std::format("Country: {}", ipDataCache[ipString].country).c_str());
-					ImGui::Text(std::format("Region: {} ({})", ipDataCache[ipString].regionName, ipDataCache[ipString].region).c_str());
-					ImGui::Text(std::format("City: {}", ipDataCache[ipString].city).c_str());
-					ImGui::Text(std::format("ISP: {}", ipDataCache[ipString].isp).c_str());
-					ImGui::Text(std::format("Org: {}", ipDataCache[ipString].org).c_str());
-					ImGui::Text(std::format("AS: {}", ipDataCache[ipString].as).c_str());
-					ImGui::Text(std::format("AS Name: {}", ipDataCache[ipString].asname).c_str());
-				}
-				else
-				{
-					ImGui::Text("lorem ipsum");
-				}
+				ImGui::SameLine();
+
+				components::options_modal(
+				    "IP Info",
+				    [ipString] {
+					    std::lock_guard<std::mutex> lock(ipDataMutex);
+					    if (ipDataCache.contains(ipString) && ipDataCache[ipString].isLoaded)
+					    {
+						    ImGui::Text(std::format("Continent: {} ({})", ipDataCache[ipString].continent, ipDataCache[ipString].continentCode).c_str());
+						    ImGui::Text(std::format("Country: {}", ipDataCache[ipString].country).c_str());
+						    ImGui::Text(std::format("Region: {} ({})", ipDataCache[ipString].regionName, ipDataCache[ipString].region).c_str());
+						    ImGui::Text(std::format("City: {}", ipDataCache[ipString].city).c_str());
+						    ImGui::Text(std::format("ISP: {}", ipDataCache[ipString].isp).c_str());
+						    ImGui::Text(std::format("Org: {}", ipDataCache[ipString].org).c_str());
+						    ImGui::Text(std::format("AS: {}", ipDataCache[ipString].as).c_str());
+						    ImGui::Text(std::format("AS Name: {}", ipDataCache[ipString].asname).c_str());
+					    }
+					    else
+					    {
+						    ImGui::TextDisabled("Fetching IP data...");
+					    }
+				    },
+				    false,
+				    "IP Info");
 			}
 			else
 			{
